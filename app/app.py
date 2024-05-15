@@ -52,7 +52,7 @@ def plot_top_job_titles(df: pd.DataFrame) -> None:
     # Add sentence about the most frequent job
     most_frequent_job = job_counts.iloc[-1]
     st.markdown(
-        f"The most frequent job is **{most_frequent_job['Job Title']}**, with {most_frequent_job['Percentage']:.2f}% market share."
+        f"The most frequent job is **{most_frequent_job['Job Title']}**, with **{most_frequent_job['Percentage']:.2f}%** of open jobs."
     )
 
 
@@ -71,31 +71,15 @@ def plot_word_cloud(df: pd.DataFrame) -> None:
     st.pyplot(plt)
 
 
-def plot_job_distribution(df: pd.DataFrame) -> None:
-    city_counts = df["city"].value_counts().reset_index()
-    city_counts.columns = ["City", "Count"]
-
-    fig = px.choropleth(
-        city_counts,
-        locations="City",
-        locationmode="ISO-3",
-        geojson="https://raw.githubusercontent.com/wjdanalharthi/GeoJSON-of-Saudi-Arabia-Regions/master/data/SA_regions.json",
-        featureidkey="properties.name",
-        color="Count",
-        hover_name="City",
-        color_continuous_scale=px.colors.sequential.Plasma,
-        title="Job Distribution Across Cities",
-    )
-    fig.update_geos(fitbounds="locations", visible=False)
-    st.plotly_chart(fig)
-
-
 def plot_average_salaries(df: pd.DataFrame) -> None:
-    city_salaries = df.groupby("city")["salary"].mean().reset_index()
-    city_salaries.columns = ["City", "Average Salary"]
+    region_salaries = df.groupby("region")["salary"].mean().reset_index()
+    region_salaries.columns = ["Region", "Average Salary"]
 
     fig = px.bar(
-        city_salaries, x="City", y="Average Salary", title="Average Salaries by City"
+        region_salaries,
+        x="Region",
+        y="Average Salary",
+        title="Average Salaries by Region",
     )
     st.plotly_chart(fig)
 
@@ -114,17 +98,37 @@ def body(df: pd.DataFrame) -> None:
         """
     )
     plot_top_job_titles(df)
+
     st.markdown(
         """
         ## Unearthing Regional Goldmines
 
-        Explore the vibrant job markets across different cities in Saudi Arabia. The distribution of job listings reveals key hotspots, with Riyadh and Jeddah sparkling the brightest. These cities offer a wide array of roles, drawing talent from across the country. Meanwhile, Dammam stands out for its high-paying jobs in the oil and gas sector, making it a true goldmine.
+        Visualize a vibrant map of Saudi Arabia dotted with treasure markers. Riyadh and Jeddah sparkle the brightest, offering a wide array of roles. Meanwhile, Dammam stands out for its high-paying jobs in the oil and gas sector, a true goldmine. This map not only reveals where jobs are plentiful but also highlights where salaries are soaring.
 
-        Our analysis uncovers where jobs are plentiful and where salaries are soaring, giving you a clear view of the regional opportunities. Visualize the job distribution and average salaries across various cities to better understand the landscape.
         """
     )
-    plot_job_distribution(df)
+
     plot_average_salaries(df)
+
+    st.markdown(
+        """
+        ## Unpacking the Treasure Chest: Salaries and Perks
+
+        Now, let's delve into the treasure chest of financial rewards. Jobs in finance and engineering are the glittering gems, offering the best salaries. Employers are sweetening the deal with perks like health insurance and remote work options, making these roles even more attractive.
+        """
+    )
+
+    st.markdown(
+        """
+        ## Navigating the Skills Bazaar
+
+        Picture a bustling marketplace filled with qualifications and skills. Degrees in business and engineering are highly coveted, like rare artifacts, often leading to higher pay. Skills in IT and project management are in great demand, making those who possess them stand out like shining treasures.
+
+        *(Insert bar chart of required qualifications and scatter plot of skills vs. salary)*
+
+        ---
+        """
+    )
 
 
 def conclusion():

@@ -142,6 +142,12 @@ def conclusion():
 
 def app() -> None:
     # handling issues gracefully
+    import os
+
+    files = [f for f in os.listdir(".")]
+    for f in files:
+        st.write(f)
+    # do something
     try:
         # load the data
         df = load_data()

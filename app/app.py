@@ -59,7 +59,7 @@ def plot_top_job_titles(df: pd.DataFrame) -> None:
 def plot_word_cloud(df: pd.DataFrame) -> None:
     text = " ".join(df["job_title"])
     wordcloud = WordCloud(
-        font_path="app/fonts/Amiri-Regular.ttf",  # Specify the path to your Arabic font file
+        # font_path="app/fonts/Amiri-Regular.ttf",  # Specify the path to your Arabic font file
         width=1200,
         height=600,
         background_color="white",

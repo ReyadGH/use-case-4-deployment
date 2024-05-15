@@ -150,9 +150,9 @@ def app() -> None:
         intro()
         body(df)
         conclusion()
-    except:
+    except Exception as e:
         st.title("Error loading the page 🤕")
-        st.write("Something went wrong")
+        st.write("Something went wrong", e)
 
 
 if __name__ == "__main__":

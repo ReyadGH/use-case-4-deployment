@@ -4,4 +4,4 @@ plotly
 WordCloud
 matplotlib
 arabic_reshaper
-bidi
+python-bidi

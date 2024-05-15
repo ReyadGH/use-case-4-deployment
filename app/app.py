@@ -79,10 +79,22 @@ def plot_word_cloud(df: pd.DataFrame) -> None:
     st.pyplot(plt)
 
 
-def plot_average_salaries(df: pd.DataFrame) -> None:
+def plot_top_average_salaries(df: pd.DataFrame) -> None:
     region_salaries = df.groupby("region")["salary"].mean().reset_index()
     region_salaries.columns = ["Region", "Average Salary"]
+    top_regions = region_salaries.sort_values(
+        by="Average Salary", ascending=False
+    ).head(3)
 
+    top_regions_text = (
+        f"The top three regions with the highest average salaries are:\n\n"
+        f"1. **{top_regions.iloc[0]['Region']}**: Average Salary of {top_regions.iloc[0]['Average Salary']:.2f}\n"
+        f"2. **{top_regions.iloc[1]['Region']}**: Average Salary of {top_regions.iloc[1]['Average Salary']:.2f}\n"
+        f"3. **{top_regions.iloc[2]['Region']}**: Average Salary of {top_regions.iloc[2]['Average Salary']:.2f}"
+    )
+    st.markdown(top_regions_text)
+
+    region_salaries = region_salaries.sort_values(by="Average Salary", ascending=False)
     fig = px.bar(
         region_salaries,
         x="Region",
@@ -92,20 +104,61 @@ def plot_average_salaries(df: pd.DataFrame) -> None:
     st.plotly_chart(fig)
 
 
+def plot_experience_vs_salary(df: pd.DataFrame) -> None:
+    top_jobs = df["job_title"].value_counts().head(10).index
+    filtered_df = df[df["job_title"].isin(top_jobs)]
+    job_experience_salary = (
+        filtered_df.groupby(["job_title", "exper"])["salary"].mean().reset_index()
+    )
+    job_experience_salary.columns = ["Job Title", "Experience", "Average Salary"]
+
+    fig = px.scatter(
+        job_experience_salary,
+        x="Experience",
+        y="Average Salary",
+        color="Job Title",
+        title="Experience vs. Average Salary by Job Title",
+        labels={
+            "Experience": "Years of Experience",
+            "Average Salary": "Average Salary",
+        },
+    )
+    st.plotly_chart(fig)
+
+
+def plot_gender_distribution(df: pd.DataFrame) -> None:
+    gender_counts = df["gender"].value_counts().reset_index()
+    gender_counts.columns = ["Gender", "Count"]
+
+    fig = px.pie(
+        gender_counts,
+        names="Gender",
+        values="Count",
+        title="Gender Distribution by Position",
+        color_discrete_map={"M": "blue", "F": "pink", "both": "gray"},
+    )
+    st.plotly_chart(fig)
+
+
 def body(df: pd.DataFrame) -> None:
+    regions = df["region"].unique()
+    selected_regions = st.multiselect("Select Regions", regions, default=regions)
+
+    filtered_df = df[df["region"].isin(selected_regions)]
+
     st.markdown(
         """
         ## The Quest for the Hottest Jobs
         """
     )
 
-    plot_word_cloud(df)
+    plot_word_cloud(filtered_df)
     st.markdown(
         """
-        Imagine stepping into a bustling treasure trove of job opportunities. The job market in Saudi Arabia is rich with a variety of roles, each with its own unique appeal. The word cloud above showcases the diversity of job titles available, giving a visual representation of the most common positions.
+        Chart your career path in Saudi Arabia with key insights. Focus on high-demand jobs, explore regions with top salaries, and understand how experience raises earnings. Consider workplace dynamics, like gender distribution, for a supportive environment. Use this information to find your next big opportunity. Happy hunting!
         """
     )
-    plot_top_job_titles(df)
+    plot_top_job_titles(filtered_df)
 
     st.markdown(
         """
@@ -116,27 +169,23 @@ def body(df: pd.DataFrame) -> None:
         """
     )
 
-    plot_average_salaries(df)
+    plot_top_average_salaries(filtered_df)
+    st.markdown("""
+                ## Charting Your Career Path
+                """)
+    plot_experience_vs_salary(filtered_df)
+    st.markdown("""
+        Ready to supercharge your career? Imagine a vibrant marketplace where your experience directly boosts your earning power. Sometimes, taking a job with lower pay now can lead to better opportunities as you gain experience. Employers often pay less for less experienced workers, but sticking with a job can be a smart investment in your future.    """)
 
-    st.markdown(
-        """
-        ## Unpacking the Treasure Chest: Salaries and Perks
+    st.markdown("""
+        ## Picking Your Crew Members
 
-        Now, let's delve into the treasure chest of financial rewards. Jobs in finance and engineering are the glittering gems, offering the best salaries. Employers are sweetening the deal with perks like health insurance and remote work options, making these roles even more attractive.
-        """
-    )
+        Finding the right work environment is just as important as the job itself. In Saudi Arabia, cultural factors like gender dynamics can greatly influence job satisfaction. The best job may not be the best fit if you're uncomfortable with your coworkers.
 
-    st.markdown(
-        """
-        ## Navigating the Skills Bazaar
+        To give you an idea of the gender distribution in various positions, take a look at the pie chart below. Understanding the workplace demographics can help you choose a job where you'll thrive.
+    """)
 
-        Picture a bustling marketplace filled with qualifications and skills. Degrees in business and engineering are highly coveted, like rare artifacts, often leading to higher pay. Skills in IT and project management are in great demand, making those who possess them stand out like shining treasures.
-
-        *(Insert bar chart of required qualifications and scatter plot of skills vs. salary)*
-
-        ---
-        """
-    )
+    plot_gender_distribution(filtered_df)
 
 
 def conclusion():
@@ -150,12 +199,6 @@ def conclusion():
 
 def app() -> None:
     # handling issues gracefully
-    import os
-
-    files = [f for f in os.listdir(".")]
-    for f in files:
-        st.write(f)
-    # do something
     try:
         # load the data
         df = load_data()

@@ -5,7 +5,7 @@ Discover the vibrant job market of Saudi Arabia through our dynamic and interact
 
 [Explore the app](https://reyadgh-5.streamlit.app/)
 
-# Member
+# Members
 
 _Riyadh Alghamdi_
 
